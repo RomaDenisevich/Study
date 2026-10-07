@@ -1,21 +1,37 @@
 #include <iostream>
 #include <stdexcept>
-int func(int a,int b){
+#include <new>
+int func(int a ,int b ){
 	int** c = new int* [b];
-	for (int v=0;v<b;v++){
-		c[v]= new int[a];
+	int allocated=0;
+	try{
+		for (;allocated<b;allocated++){
+			c[allocated]= new int[a];
+	}
+	}
+	catch(const std::bad_alloc&){
+		for (int l=0;l<allocated;l++){
+			delete[] c[l];
+		}
+		delete[] c;
+		throw;
 	}
 	for (int j=0;j<a;j++){
 		for (int k=0;k<b;k++){
 			std::cin >> c[k][j];
 			if (std::cin.fail()){
+				for (int perem=0;perem<b;perem++){
+					delete[] c[perem];
+}
+				delete[] c;
 				throw 1;
-			}
+}
 		}
 	}
+	std::cout << "\n";
 	for (int sh=0;sh<b;sh++){
 		for (int kh=0;kh<a;kh++){
-			std::cout << c[sh][kh];
+			std::cout << c[sh][kh] << " ";
 		}
 		std::cout << "\n";
 	}
@@ -26,13 +42,17 @@ int func(int a,int b){
 	return 0;
 }
 int main(){
+	try{
 	int m=0, n=0;
 	std::cin >> m >> n;
+	if (n<0 || m<0){
+		throw 1;
+	}
 	if (std::cin.fail()){
 		std::cerr << "Error 1" << "\n";
 		return 1;
 	}
-	try{
+
 		int yo=func(m,n);
 	}
 	catch (int err){
