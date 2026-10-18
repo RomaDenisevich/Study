@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <new>
 #include <cstddef>
+#include <algorithm>
 int** concat_rows(const int* const * lhs,size_t n1,size_t m1,const int* const * rhs,size_t n2,size_t m2) {
 	if (rhs==nullptr || lhs==nullptr) {
 		throw std::invalid_argument("rhs or lhs is a nullptr");
@@ -76,6 +77,15 @@ int** concat_rows(const int* const * lhs,size_t n1,size_t m1,const int* const * 
 	}
 	return result;
 }
+void free_matrix (int** h,size_t l) {
+	if (h==nullptr) {
+		return;
+	}	
+	for (size_t i=0;i<l;i++) {
+		delete[] h[i];
+	}	
+	delete[] h;
+}
 int main () {
 	size_t N1=3,M1=3,N2=4,M2=2;
 	int** first = new int* [3];
@@ -92,40 +102,37 @@ int main () {
 			second[i][j]=3;
 		}
 	}
+	int** massive = nullptr;
 	try {
-	int** massive = concat_rows(first,N1,M1,second,N2,M2);
-	for (int i=0;i<3;i++) {
+		massive = concat_rows(first,N1,M1,second,N2,M2);
+		for (int i=0;i<3;i++) {
+			std::cout << "\n";
+			for (int j=0;j<5;j++) {
+				std::cout << massive[i][j] << " ";
+			}	
+		}	
 		std::cout << "\n";
-		for (int j=0;j<5;j++) {
-			std::cout << massive[i][j] << " ";
+		for (int j=0;j<2;j++) {
+			std::cout << massive[3][j] << " ";
 		}
+		std::cout << "\n";
+		free_matrix(massive,std::max(N1,N2));
+		free_matrix(first,N1);
+		free_matrix(second,N2);
+		return 0;
 	}
-	std::cout << "\n";
-	for (int j=0;j<2;j++) {
-		std::cout << massive[3][j] << " ";
-	}
-	std::cout << "\n";
-	for (int i=0;i<4;i++) {
-		delete [] massive[i];
-	}
-	delete[] massive;
-	for (int i =0;i<3;i++) {
-		delete[] first[i];
-	}
-	delete[] first;
-	for (int i=0;i<4;i++) {
-		delete[] second[i];
-	}
-	delete[] second;
-	}
-
-	catch (std::invalid_argument) {
+	catch (std::invalid_argument&) {
 		std::cerr << "wrong data";
+		free_matrix(first,N1);
+		free_matrix(second,N2);
 		return 2;
-	}
+	}	
 	catch (std::bad_alloc&) {
 		std::cerr << "too big numbers";
-		return 2;
 	}
+	free_matrix(massive,std::max(N1,N2));
+	free_matrix(first,N1);
+	free_matrix(second,N2);
+	return 2;
 }
 
